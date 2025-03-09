@@ -1,24 +1,21 @@
-name: firecrawl
+name: firecrawl-master
 
 x-common-service: &common-service
   build: apps/api
   networks:
     - backend
   environment:
-    - REDIS_URL=${REDIS_URL:-redis://redis:6379}
-    - REDIS_RATE_LIMIT_URL=${REDIS_URL:-redis://redis:6379}
-    - PLAYWRIGHT_MICROSERVICE_URL=${PLAYWRIGHT_MICROSERVICE_URL:-http://playwright-service:3000}
-    - PORT=${PORT:-3002}
-    - NUM_WORKERS_PER_QUEUE=${NUM_WORKERS_PER_QUEUE}
-    - BULL_AUTH_KEY=${BULL_AUTH_KEY}
-    - TEST_API_KEY=${TEST_API_KEY}
-    - HOST=${HOST:-0.0.0.0}
-    - LOGGING_LEVEL=${LOGGING_LEVEL}
-    - MAX_RAM=${MAX_RAM:-0.95}
-    - MAX_CPU=${MAX_CPU:-0.95}
+    - REDIS_URL=redis://redis:6379
+    - REDIS_RATE_LIMIT_URL=redis://redis:6379
+    - PORT=3002
+    - NUM_WORKERS_PER_QUEUE=2
+    - BULL_AUTH_KEY=possumden
+    - HOST=0.0.0.0
+    - LOGGING_LEVEL=info
+    - MAX_RAM=0.95
+    - MAX_CPU=0.95
   extra_hosts:
     - "host.docker.internal:host-gateway"
-
 services:
   puppeteer-service:
     image: trieve/puppeteer-service-ts
@@ -27,14 +24,12 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3000
-      - PROXY_SERVER=${PROXY_SERVER}
-      - PROXY_USERNAME=${PROXY_USERNAME}
-      - PROXY_PASSWORD=${PROXY_PASSWORD}
-      - TWOCAPTCHA_TOKEN=${TWOCAPTCHA_TOKEN}
-      - MAX_CONCURRENCY=${MAX_CONCURRENCY}
+      - MAX_CONCURRENCY=5
     networks:
       - backend
-
+    # Expose the Playwright/Puppeteer service to external connections
+    ports:
+      - "3100:3000"
   api:
     image: trieve/firecrawl
     <<: *common-service
@@ -44,7 +39,6 @@ services:
     ports:
       - "3002:3002"
     command: ["pnpm", "run", "start:production"]
-
   worker:
     <<: *common-service
     depends_on:
@@ -52,13 +46,19 @@ services:
       - puppeteer-service
       - api
     command: ["pnpm", "run", "workers"]
-
   redis:
     image: redis:alpine
     networks:
       - backend
-    command: redis-server --bind 0.0.0.0
-
+    # Expose Redis to external connections with password protection
+    command: redis-server --bind 0.0.0.0 --requirepass firecrawl_redis_password
+    ports:
+      - "6380:6379"
+    # Add volume for data persistence
+    volumes:
+      - redis_data:/data
 networks:
   backend:
     driver: bridge
+volumes:
+  redis_data:

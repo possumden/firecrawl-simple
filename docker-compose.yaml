@@ -6,7 +6,6 @@ x-common-service: &common-service
     - backend
   environment:
     - REDIS_URL=redis://redis:6379
-    - REDIS_RATE_LIMIT_URL=redis://redis:6379
     - PORT=3002
     - NUM_WORKERS_PER_QUEUE=2
     - BULL_AUTH_KEY=possumden

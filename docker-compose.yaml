@@ -46,6 +46,8 @@ services:
       - puppeteer-service
       - api
     command: ["pnpm", "run", "workers"]
+    environment:
+      - WORKER_ID=${WORKER_NAME:-main-worker}
   redis:
     image: redis:alpine
     networks:

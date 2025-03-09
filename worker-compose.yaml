@@ -6,9 +6,8 @@ x-common-service: &common-service
     - worker_network
   environment:
     # Connect to the main server's Redis instance with hardcoded values
-    - REDIS_URL=redis://192.168.1.167:6399
-    - REDIS_RATE_LIMIT_URL=redis://192.168.1.167:6399
-    - PLAYWRIGHT_MICROSERVICE_URL=http://192.168.1.167:3000
+    - REDIS_URL=redis://192.168.1.167:6380
+    - REDIS_RATE_LIMIT_URL=redis://192.168.1.167:6380
     - PORT=3002
     - NUM_WORKERS_PER_QUEUE=2
     - BULL_AUTH_KEY=possumden

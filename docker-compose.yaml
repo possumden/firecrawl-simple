@@ -5,8 +5,8 @@ x-common-service: &common-service
   networks:
     - backend
   environment:
-    - REDIS_URL=redis://redis:6379
-    - REDIS_RATE_LIMIT_URL=redis://redis:6379
+    - REDIS_URL=redis://redis:6399
+    - REDIS_RATE_LIMIT_URL=redis://redis:6399
     - PORT=3002
     - NUM_WORKERS_PER_QUEUE=2
     - BULL_AUTH_KEY=possumden
@@ -23,7 +23,7 @@ services:
       context: ./apps/puppeteer-service-ts/
       dockerfile: Dockerfile
     environment:
-      - PORT=3000
+      - PORT=3100
       - MAX_CONCURRENCY=5
     networks:
       - backend
@@ -55,7 +55,7 @@ services:
     # Expose Redis to external connections with password protection
     command: redis-server --bind 0.0.0.0 --requirepass firecrawl_redis_password
     ports:
-      - "6380:6379"
+      - "6399:6379"
     # Add volume for data persistence
     volumes:
       - redis_data:/data

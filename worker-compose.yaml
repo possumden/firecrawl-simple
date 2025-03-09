@@ -1,0 +1,56 @@
+name: firecrawl-worker
+
+x-common-service: &common-service
+  build: apps/api
+  networks:
+    - worker_network
+  environment:
+    # Connect to the main server's Redis instance with hardcoded values
+    - REDIS_URL=redis://192.168.1.167:6380
+    - REDIS_RATE_LIMIT_URL=redis://192.168.1.167:6380
+    - PLAYWRIGHT_MICROSERVICE_URL=http://192.168.1.167:3000
+    - PORT=3002
+    - NUM_WORKERS_PER_QUEUE=2
+    - BULL_AUTH_KEY=possumden
+    - HOST=0.0.0.0
+    - LOGGING_LEVEL=info
+    - MAX_RAM=0.95
+    - MAX_CPU=0.95
+    # Add connection details to the main server API
+    - MAIN_SERVER_API_URL=http://192.168.1.167:3002
+    - WORKER_ID=worker-1
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+    # Add the main server hostname resolution
+    - "main-server-host:192.168.1.167"
+
+services:
+  puppeteer-service:
+    image: trieve/puppeteer-service-ts
+    build:
+      context: ./apps/puppeteer-service-ts/
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3000
+      - MAX_CONCURRENCY=5
+    networks:
+      - worker_network
+
+  worker:
+    <<: *common-service
+    image: trieve/firecrawl
+    depends_on:
+      - puppeteer-service
+    command: ["pnpm", "run", "workers"]
+    # Add restart policy for reliability
+    restart: unless-stopped
+    # Set resource limits for the worker
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+networks:
+  worker_network:
+    driver: bridge

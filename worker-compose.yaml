@@ -1,4 +1,4 @@
-name: firecrawl-worker
+name: firecrawl-${WORKER_NAME:-worker-1}
 
 x-common-service: &common-service
   build: apps/api
@@ -18,7 +18,7 @@ x-common-service: &common-service
     - MAX_CPU=0.95
     # Add connection details to the main server API
     - MAIN_SERVER_API_URL=http://192.168.1.167:3002
-    - WORKER_ID=worker-1
+    - WORKER_ID=${WORKER_NAME:-worker-1}
   extra_hosts:
     - "host.docker.internal:host-gateway"
     # Add the main server hostname resolution

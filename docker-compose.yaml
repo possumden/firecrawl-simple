@@ -55,7 +55,7 @@ services:
     # Expose Redis to external connections with password protection
     command: redis-server --bind 0.0.0.0 --requirepass firecrawl_redis_password
     ports:
-      - "6399:6379"
+      - "6399:6399"
     # Add volume for data persistence
     volumes:
       - redis_data:/data

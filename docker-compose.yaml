@@ -5,8 +5,8 @@ x-common-service: &common-service
   networks:
     - backend
   environment:
-    - REDIS_URL=redis://redis:6399
-    - REDIS_RATE_LIMIT_URL=redis://redis:6399
+    - REDIS_URL=redis://redis:6380
+    - REDIS_RATE_LIMIT_URL=redis://redis:6380
     - PORT=3002
     - NUM_WORKERS_PER_QUEUE=2
     - BULL_AUTH_KEY=possumden
@@ -53,9 +53,9 @@ services:
     networks:
       - backend
     # Expose Redis to external connections with password protection
-    command: redis-server --bind 0.0.0.0 --requirepass firecrawl_redis_password
+    command: redis-server --bind 0.0.0.0
     ports:
-      - "6399:6399"
+      - "6380:6379"
     # Add volume for data persistence
     volumes:
       - redis_data:/data
